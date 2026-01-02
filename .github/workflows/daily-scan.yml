@@ -1,111 +1,316 @@
-name: Daily Iran Reachability Scan
+name: 🛡️ FilterMapIR Daily Network Intelligence Scan
 
 on:
+  # Scheduled daily runs
   schedule:
-    # Run daily at 00:00 UTC (03:30 Iran time)
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *'    # 00:00 UTC (03:30 Iran)
+    - cron: '0 12 * * *'   # 12:00 UTC (15:30 Iran) - Second scan
+  
+  # Manual trigger with options
   workflow_dispatch:
     inputs:
       enable_traceroute:
-        description: 'Enable traceroute tests'
+        description: '🔀 Enable Traceroute Analysis'
         required: false
         type: boolean
         default: false
+      deep_scan:
+        description: '🔍 Deep Scan Mode (More comprehensive but slower)'
+        required: false
+        type: boolean
+        default: false
+      custom_targets:
+        description: '🎯 Custom targets file (leave empty for default)'
+        required: false
+        type: string
+        default: ''
 
+# Permissions
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+# Concurrency - prevent multiple scans running simultaneously
+concurrency:
+  group: network-scan
+  cancel-in-progress: false
+
+env:
+  SCAN_TIMEOUT: 3600  # 1 hour max
+  REPORT_RETENTION_DAYS: 90
 
 jobs:
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JOB 1: Network Scan
+  # ═══════════════════════════════════════════════════════════════════════════
   network-scan:
-    name: Run Network Scan
+    name: 📡 Network Intelligence Scan
     runs-on: windows-latest
+    timeout-minutes: 60
+    
+    outputs:
+      scan_date: ${{ steps.scan.outputs.scan_date }}
+      pass_rate: ${{ steps.analyze.outputs.pass_rate }}
+      total_targets: ${{ steps.analyze.outputs.total_targets }}
+      blocked_count: ${{ steps.analyze.outputs.blocked_count }}
+      scan_status: ${{ steps.analyze.outputs.scan_status }}
     
     steps:
-      - name: Checkout repository
+      # ─────────────────────────────────────────────────────────────────────────
+      # Checkout
+      # ─────────────────────────────────────────────────────────────────────────
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      
-      - name: Display system info
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      # ─────────────────────────────────────────────────────────────────────────
+      # System Info
+      # ─────────────────────────────────────────────────────────────────────────
+      - name: 🖥️ System Information
+        id: sysinfo
         run: |
-          Write-Host "=== System Information ===" -ForegroundColor Cyan
-          Write-Host "Hostname: $env:COMPUTERNAME"
-          Write-Host "OS: $([System.Environment]::OSVersion.VersionString)"
-          Write-Host "PowerShell: $($PSVersionTable.PSVersion)"
-          Write-Host "Date/Time: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')"
+          Write-Host "╔══════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
+          Write-Host "║           FilterMapIR Network Intelligence Scanner               ║" -ForegroundColor Cyan
+          Write-Host "╚══════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
           Write-Host ""
-          Write-Host "=== Network Info ===" -ForegroundColor Cyan
-          Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike "127.*" } | Select-Object -First 1
-        shell: pwsh
-      
-      - name: Run network scan
-        id: scan
-        run: |
-          Write-Host "Starting FilterMapIR Network Scan..." -ForegroundColor Green
           
-          $tracerouteParam = ""
-          if ("${{ github.event.inputs.enable_traceroute }}" -eq "true") {
-            $tracerouteParam = "-EnableTraceroute"
+          $info = @{
+            Hostname = $env:COMPUTERNAME
+            OS = [System.Environment]::OSVersion.VersionString
+            PowerShell = $PSVersionTable.PSVersion.ToString()
+            DateTime = Get-Date -Format "yyyy-MM-dd HH:mm:ss UTC"
+            RunId = "${{ github.run_id }}"
+            RunNumber = "${{ github.run_number }}"
+            Trigger = "${{ github.event_name }}"
           }
           
+          Write-Host "┌─ System Details" -ForegroundColor Yellow
+          $info.GetEnumerator() | ForEach-Object {
+            Write-Host "│  $($_.Key): $($_.Value)" -ForegroundColor Gray
+          }
+          Write-Host "└────────────────" -ForegroundColor Yellow
+          
+          # Get runner public IP (for location detection)
           try {
-            if ($tracerouteParam) {
-              & "${{ github.workspace }}\scripts\netcheck.ps1" $tracerouteParam
+            $geoData = Invoke-RestMethod -Uri "http://ip-api.com/json/?fields=country,countryCode,city,isp,as" -TimeoutSec 10
+            Write-Host ""
+            Write-Host "┌─ Scanner Location" -ForegroundColor Yellow
+            Write-Host "│  Country: $($geoData.country) ($($geoData.countryCode))" -ForegroundColor Gray
+            Write-Host "│  City: $($geoData.city)" -ForegroundColor Gray
+            Write-Host "│  ISP: $($geoData.isp)" -ForegroundColor Gray
+            Write-Host "│  ASN: $($geoData.as)" -ForegroundColor Gray
+            Write-Host "└────────────────" -ForegroundColor Yellow
+            
+            echo "runner_country=$($geoData.countryCode)" >> $env:GITHUB_OUTPUT
+            echo "runner_isp=$($geoData.isp)" >> $env:GITHUB_OUTPUT
+          }
+          catch {
+            Write-Host "Could not determine runner location" -ForegroundColor DarkGray
+          }
+        shell: pwsh
+
+      # ─────────────────────────────────────────────────────────────────────────
+      # Network Diagnostics
+      # ─────────────────────────────────────────────────────────────────────────
+      - name: 🔧 Pre-Scan Network Diagnostics
+        run: |
+          Write-Host "┌─ Network Interfaces" -ForegroundColor Yellow
+          Get-NetIPAddress -AddressFamily IPv4 | 
+            Where-Object { $_.IPAddress -notlike "127.*" } | 
+            Select-Object IPAddress, InterfaceAlias |
+            ForEach-Object { Write-Host "│  $($_.InterfaceAlias): $($_.IPAddress)" -ForegroundColor Gray }
+          Write-Host "└────────────────" -ForegroundColor Yellow
+          
+          Write-Host ""
+          Write-Host "┌─ DNS Configuration" -ForegroundColor Yellow
+          Get-DnsClientServerAddress -AddressFamily IPv4 | 
+            Where-Object { $_.ServerAddresses } |
+            Select-Object -First 2 |
+            ForEach-Object { Write-Host "│  $($_.InterfaceAlias): $($_.ServerAddresses -join ', ')" -ForegroundColor Gray }
+          Write-Host "└────────────────" -ForegroundColor Yellow
+        shell: pwsh
+
+      # ─────────────────────────────────────────────────────────────────────────
+      # Run Scan
+      # ─────────────────────────────────────────────────────────────────────────
+      - name: 🚀 Execute Network Scan
+        id: scan
+        run: |
+          Write-Host ""
+          Write-Host "╔══════════════════════════════════════════════════════════════════╗" -ForegroundColor Green
+          Write-Host "║                    Starting Network Scan                          ║" -ForegroundColor Green
+          Write-Host "╚══════════════════════════════════════════════════════════════════╝" -ForegroundColor Green
+          Write-Host ""
+          
+          $dateFolder = Get-Date -Format "yyyy-MM-dd"
+          $startTime = Get-Date
+          
+          # Build parameters
+          $params = @()
+          
+          if ("${{ github.event.inputs.enable_traceroute }}" -eq "true") {
+            $params += "-EnableTraceroute"
+            Write-Host "✓ Traceroute: Enabled" -ForegroundColor Cyan
+          }
+          
+          if ("${{ github.event.inputs.deep_scan }}" -eq "true") {
+            $params += "-DeepScan"
+            Write-Host "✓ Deep Scan: Enabled" -ForegroundColor Cyan
+          }
+          
+          $customTargets = "${{ github.event.inputs.custom_targets }}"
+          if ($customTargets) {
+            $params += "-TargetsFile `"$customTargets`""
+            Write-Host "✓ Custom Targets: $customTargets" -ForegroundColor Cyan
+          }
+          
+          Write-Host ""
+          
+          # Execute scan
+          try {
+            $scriptPath = "${{ github.workspace }}\scripts\netcheck.ps1"
+            
+            if ($params.Count -gt 0) {
+              $paramString = $params -join " "
+              Invoke-Expression "& `"$scriptPath`" $paramString"
             } else {
-              & "${{ github.workspace }}\scripts\netcheck.ps1"
+              & $scriptPath
             }
+            
             $scanExitCode = $LASTEXITCODE
           }
           catch {
-            Write-Host "Scan encountered an error: $_" -ForegroundColor Yellow
+            Write-Host "⚠️ Scan encountered an error: $_" -ForegroundColor Yellow
             $scanExitCode = 1
           }
           
-          # Always generate metadata file
-          $dateFolder = Get-Date -Format "yyyy-MM-dd"
-          $metaFile = "${{ github.workspace }}\reports\$dateFolder\metadata.json"
+          $endTime = Get-Date
+          $duration = $endTime - $startTime
           
-          $metadata = @{
-            runId = "${{ github.run_id }}"
-            runNumber = "${{ github.run_number }}"
-            triggeredBy = "${{ github.event_name }}"
-            repository = "${{ github.repository }}"
-            branch = "${{ github.ref_name }}"
-            commitSha = "${{ github.sha }}"
-            runnerOs = "${{ runner.os }}"
-            timestamp = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
-            scanExitCode = $scanExitCode
-          }
+          Write-Host ""
+          Write-Host "┌─ Scan Complete" -ForegroundColor Yellow
+          Write-Host "│  Duration: $($duration.ToString('hh\:mm\:ss'))" -ForegroundColor Gray
+          Write-Host "│  Exit Code: $scanExitCode" -ForegroundColor Gray
+          Write-Host "└────────────────" -ForegroundColor Yellow
           
-          $metadata | ConvertTo-Json | Out-File $metaFile -Encoding UTF8
-          
-          Write-Host "Scan completed with exit code: $scanExitCode"
-          
-          # Set output for use in later steps
+          # Set outputs
           echo "scan_date=$dateFolder" >> $env:GITHUB_OUTPUT
           echo "exit_code=$scanExitCode" >> $env:GITHUB_OUTPUT
+          echo "duration=$($duration.TotalSeconds)" >> $env:GITHUB_OUTPUT
         shell: pwsh
         continue-on-error: true
-      
-      - name: Update latest report symlink
+
+      # ─────────────────────────────────────────────────────────────────────────
+      # Analyze Results
+      # ─────────────────────────────────────────────────────────────────────────
+      - name: 📊 Analyze Scan Results
+        id: analyze
         run: |
           $dateFolder = "${{ steps.scan.outputs.scan_date }}"
-          $latestFile = "${{ github.workspace }}\reports\latest.json"
+          $summaryFile = "${{ github.workspace }}\reports\$dateFolder\summary.json"
           
-          $latestInfo = @{
-            date = $dateFolder
-            path = "reports/$dateFolder"
-            updated = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+          if (Test-Path $summaryFile) {
+            $summary = Get-Content $summaryFile | ConvertFrom-Json
+            $meta = $summary.metadata
+            
+            # Calculate status
+            $status = "success"
+            if ($meta.passRate -lt 50) { $status = "critical" }
+            elseif ($meta.passRate -lt 80) { $status = "warning" }
+            
+            # Set outputs
+            echo "pass_rate=$($meta.passRate)" >> $env:GITHUB_OUTPUT
+            echo "total_targets=$($meta.totalTargets)" >> $env:GITHUB_OUTPUT
+            echo "pass_count=$($meta.passCount)" >> $env:GITHUB_OUTPUT
+            echo "blocked_count=$($meta.failCount)" >> $env:GITHUB_OUTPUT
+            echo "avg_latency=$($meta.avgLatency)" >> $env:GITHUB_OUTPUT
+            echo "scan_status=$status" >> $env:GITHUB_OUTPUT
+            
+            Write-Host ""
+            Write-Host "╔══════════════════════════════════════════════════════════════════╗" -ForegroundColor Cyan
+            Write-Host "║                      SCAN RESULTS SUMMARY                         ║" -ForegroundColor Cyan
+            Write-Host "╠══════════════════════════════════════════════════════════════════╣" -ForegroundColor Cyan
+            Write-Host "║  Total Targets:    $($meta.totalTargets.ToString().PadLeft(5))                                      ║" -ForegroundColor White
+            Write-Host "║  ✅ Reachable:     $($meta.passCount.ToString().PadLeft(5))                                      ║" -ForegroundColor Green
+            Write-Host "║  🚫 Blocked/Failed: $($meta.failCount.ToString().PadLeft(5))                                      ║" -ForegroundColor Red
+            Write-Host "║  📊 Pass Rate:     $($meta.passRate.ToString().PadLeft(5))%                                     ║" -ForegroundColor Yellow
+            Write-Host "║  ⏱️  Avg Latency:   $($meta.avgLatency.ToString().PadLeft(5))ms                                    ║" -ForegroundColor Cyan
+            Write-Host "╚══════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
+            
+            # List blocked targets
+            $blocked = $summary.results | Where-Object { $_.OverallStatus -notin @("PASS") }
+            if ($blocked.Count -gt 0) {
+              Write-Host ""
+              Write-Host "┌─ Blocked/Failed Targets" -ForegroundColor Red
+              $blocked | ForEach-Object {
+                $intel = $_.Intelligence
+                $loc = if ($intel.CountryCode) { "[$($intel.CountryCode)]" } else { "" }
+                Write-Host "│  ❌ $($_.Name) ($($_.Host)) $loc - $($_.OverallStatus)" -ForegroundColor Red
+              }
+              Write-Host "└────────────────" -ForegroundColor Red
+            }
+          }
+          else {
+            Write-Host "⚠️ Summary file not found" -ForegroundColor Yellow
+            echo "scan_status=error" >> $env:GITHUB_OUTPUT
+          }
+        shell: pwsh
+
+      # ─────────────────────────────────────────────────────────────────────────
+      # Generate Metadata
+      # ─────────────────────────────────────────────────────────────────────────
+      - name: 📝 Generate Scan Metadata
+        run: |
+          $dateFolder = "${{ steps.scan.outputs.scan_date }}"
+          $metaDir = "${{ github.workspace }}\reports\$dateFolder"
+          
+          if (-not (Test-Path $metaDir)) {
+            New-Item -ItemType Directory -Path $metaDir -Force | Out-Null
           }
           
-          $latestInfo | ConvertTo-Json | Out-File $latestFile -Encoding UTF8
-          Write-Host "Updated latest.json to point to: $dateFolder"
+          $metadata = @{
+            workflow = @{
+              runId = "${{ github.run_id }}"
+              runNumber = ${{ github.run_number }}
+              triggeredBy = "${{ github.event_name }}"
+              actor = "${{ github.actor }}"
+              repository = "${{ github.repository }}"
+              branch = "${{ github.ref_name }}"
+              commitSha = "${{ github.sha }}"
+            }
+            runner = @{
+              os = "${{ runner.os }}"
+              arch = "${{ runner.arch }}"
+            }
+            scan = @{
+              date = $dateFolder
+              duration = "${{ steps.scan.outputs.duration }}"
+              exitCode = "${{ steps.scan.outputs.exit_code }}"
+              traceroute = "${{ github.event.inputs.enable_traceroute }}" -eq "true"
+              deepScan = "${{ github.event.inputs.deep_scan }}" -eq "true"
+            }
+            timestamp = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+          }
+          
+          $metadata | ConvertTo-Json -Depth 5 | Out-File (Join-Path $metaDir "metadata.json") -Encoding UTF8
+          Write-Host "✓ Metadata saved" -ForegroundColor Green
         shell: pwsh
-      
-      - name: Generate pages data
+
+      # ─────────────────────────────────────────────────────────────────────────
+      # Update Pages Data
+      # ─────────────────────────────────────────────────────────────────────────
+      - name: 🌐 Update GitHub Pages Data
         run: |
           $reportsDir = "${{ github.workspace }}\reports"
           $docsDir = "${{ github.workspace }}\docs"
+          $dataDir = "$docsDir\data"
+          
+          if (-not (Test-Path $dataDir)) {
+            New-Item -ItemType Directory -Path $dataDir -Force | Out-Null
+          }
           
           # Find all report dates
           $reportDates = Get-ChildItem -Path $reportsDir -Directory | 
@@ -113,93 +318,267 @@ jobs:
             Sort-Object Name -Descending |
             Select-Object -ExpandProperty Name
           
+          Write-Host "Found $($reportDates.Count) historical reports" -ForegroundColor Cyan
+          
           # Build history data
           $historyData = @()
           foreach ($date in $reportDates) {
             $summaryFile = Join-Path $reportsDir "$date\summary.json"
             if (Test-Path $summaryFile) {
-              $summary = Get-Content $summaryFile | ConvertFrom-Json
-              $historyData += @{
-                date = $date
-                totalTargets = $summary.metadata.totalTargets
-                passCount = $summary.metadata.passCount
-                failCount = $summary.metadata.failCount
-                passRate = $summary.metadata.passRate
-                avgLatency = $summary.metadata.avgLatency
+              try {
+                $summary = Get-Content $summaryFile | ConvertFrom-Json
+                $historyData += @{
+                  date = $date
+                  totalTargets = $summary.metadata.totalTargets
+                  passCount = $summary.metadata.passCount
+                  failCount = $summary.metadata.failCount
+                  passRate = $summary.metadata.passRate
+                  avgLatency = $summary.metadata.avgLatency
+                }
+              }
+              catch {
+                Write-Host "⚠️ Could not parse $summaryFile" -ForegroundColor Yellow
               }
             }
           }
           
-          # Save history for pages
-          $historyData | ConvertTo-Json -Depth 5 | Out-File (Join-Path $docsDir "data\history.json") -Encoding UTF8
+          # Save history
+          $historyData | ConvertTo-Json -Depth 5 | Out-File (Join-Path $dataDir "history.json") -Encoding UTF8
+          Write-Host "✓ History updated with $($historyData.Count) entries" -ForegroundColor Green
           
           # Copy latest summary to docs
           $latestDate = $reportDates | Select-Object -First 1
           if ($latestDate) {
             $latestSummary = Join-Path $reportsDir "$latestDate\summary.json"
             if (Test-Path $latestSummary) {
-              Copy-Item $latestSummary (Join-Path $docsDir "data\latest.json") -Force
+              Copy-Item $latestSummary (Join-Path $dataDir "latest.json") -Force
+              Write-Host "✓ Latest data updated from $latestDate" -ForegroundColor Green
             }
           }
           
-          Write-Host "Generated pages data with $($historyData.Count) historical records"
+          # Update latest.json pointer
+          @{
+            date = $latestDate
+            path = "reports/$latestDate"
+            updated = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+          } | ConvertTo-Json | Out-File (Join-Path $reportsDir "latest.json") -Encoding UTF8
         shell: pwsh
-      
-      - name: Commit and push reports
+
+      # ─────────────────────────────────────────────────────────────────────────
+      # Commit Changes
+      # ─────────────────────────────────────────────────────────────────────────
+      - name: 💾 Commit Reports
         run: |
           git config user.name "FilterMapIR Bot"
-          git config user.email "bot@filtermapir.local"
+          git config user.email "bot@filtermapir.github.io"
           
           git add reports/
           git add docs/data/
           
           $dateFolder = "${{ steps.scan.outputs.scan_date }}"
-          $exitCode = "${{ steps.scan.outputs.exit_code }}"
+          $passRate = "${{ steps.analyze.outputs.pass_rate }}"
+          $status = "${{ steps.analyze.outputs.scan_status }}"
           
-          $status = if ($exitCode -eq "0") { "✅ All tests passed" } else { "⚠️ Some tests failed" }
+          $statusEmoji = switch ($status) {
+            "success" { "✅" }
+            "warning" { "⚠️" }
+            "critical" { "🚨" }
+            default { "📊" }
+          }
           
-          git commit -m "📊 Daily scan report: $dateFolder - $status" -m "Run ID: ${{ github.run_id }}" || echo "No changes to commit"
+          $commitMsg = "$statusEmoji Daily Scan: $dateFolder | Pass Rate: ${passRate}%"
+          
+          git commit -m "$commitMsg" -m "Run ID: ${{ github.run_id }}" -m "Triggered by: ${{ github.event_name }}" || echo "No changes to commit"
           git push
         shell: pwsh
-      
-      - name: Upload artifacts
+
+      # ─────────────────────────────────────────────────────────────────────────
+      # Upload Artifacts
+      # ─────────────────────────────────────────────────────────────────────────
+      - name: 📦 Upload Scan Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: scan-report-${{ steps.scan.outputs.scan_date }}
-          path: reports/${{ steps.scan.outputs.scan_date }}/
+          path: |
+            reports/${{ steps.scan.outputs.scan_date }}/
           retention-days: 30
-      
-      - name: Summary
+
+      # ─────────────────────────────────────────────────────────────────────────
+      # Job Summary
+      # ─────────────────────────────────────────────────────────────────────────
+      - name: 📋 Generate Job Summary
         run: |
           $dateFolder = "${{ steps.scan.outputs.scan_date }}"
           $summaryFile = "${{ github.workspace }}\reports\$dateFolder\summary.json"
           
+          # Header
+          echo "# 🛡️ FilterMapIR Network Intelligence Report" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "**Date:** $dateFolder | **Run:** #${{ github.run_number }} | **Trigger:** ${{ github.event_name }}" >> $env:GITHUB_STEP_SUMMARY
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          
           if (Test-Path $summaryFile) {
             $summary = Get-Content $summaryFile | ConvertFrom-Json
+            $meta = $summary.metadata
             
-            Write-Host ""
-            Write-Host "========================================" -ForegroundColor Cyan
-            Write-Host "   FilterMapIR Daily Scan Summary" -ForegroundColor Cyan
-            Write-Host "========================================" -ForegroundColor Cyan
-            Write-Host ""
-            Write-Host "Date: $dateFolder"
-            Write-Host "Total Targets: $($summary.metadata.totalTargets)"
-            Write-Host "Pass: $($summary.metadata.passCount)" -ForegroundColor Green
-            Write-Host "Fail: $($summary.metadata.failCount)" -ForegroundColor Red
-            Write-Host "Pass Rate: $($summary.metadata.passRate)%"
-            Write-Host "Avg Latency: $($summary.metadata.avgLatency)ms"
-            Write-Host ""
+            # Status Badge
+            $statusColor = "brightgreen"
+            $statusText = "✅ Normal"
+            if ($meta.passRate -lt 50) {
+              $statusColor = "red"
+              $statusText = "🚨 Critical"
+            }
+            elseif ($meta.passRate -lt 80) {
+              $statusColor = "yellow"
+              $statusText = "⚠️ Degraded"
+            }
             
-            # GitHub Actions Job Summary
-            echo "## 📊 FilterMapIR Daily Scan Results" >> $env:GITHUB_STEP_SUMMARY
+            echo "## $statusText" >> $env:GITHUB_STEP_SUMMARY
+            echo "" >> $env:GITHUB_STEP_SUMMARY
+            
+            # Stats Table
+            echo "### 📊 Statistics" >> $env:GITHUB_STEP_SUMMARY
             echo "" >> $env:GITHUB_STEP_SUMMARY
             echo "| Metric | Value |" >> $env:GITHUB_STEP_SUMMARY
             echo "|--------|-------|" >> $env:GITHUB_STEP_SUMMARY
-            echo "| 📅 Date | $dateFolder |" >> $env:GITHUB_STEP_SUMMARY
-            echo "| 🎯 Total Targets | $($summary.metadata.totalTargets) |" >> $env:GITHUB_STEP_SUMMARY
-            echo "| ✅ Pass | $($summary.metadata.passCount) |" >> $env:GITHUB_STEP_SUMMARY
-            echo "| ❌ Fail | $($summary.metadata.failCount) |" >> $env:GITHUB_STEP_SUMMARY
-            echo "| 📈 Pass Rate | $($summary.metadata.passRate)% |" >> $env:GITHUB_STEP_SUMMARY
-            echo "| ⏱️ Avg Latency | $($summary.metadata.avgLatency)ms |" >> $env:GITHUB_STEP_SUMMARY
+            echo "| 🎯 Total Targets | **$($meta.totalTargets)** |" >> $env:GITHUB_STEP_SUMMARY
+            echo "| ✅ Reachable | **$($meta.passCount)** |" >> $env:GITHUB_STEP_SUMMARY
+            echo "| 🚫 Blocked/Failed | **$($meta.failCount)** |" >> $env:GITHUB_STEP_SUMMARY
+            echo "| ⚠️ Partial/Degraded | **$($meta.partialCount + $meta.degradedCount)** |" >> $env:GITHUB_STEP_SUMMARY
+            echo "| 📈 Pass Rate | **$($meta.passRate)%** |" >> $env:GITHUB_STEP_SUMMARY
+            echo "| ⏱️ Avg Latency | **$($meta.avgLatency)ms** |" >> $env:GITHUB_STEP_SUMMARY
+            echo "" >> $env:GITHUB_STEP_SUMMARY
+            
+            # Scanner Location
+            if ($summary.scannerLocation) {
+              $loc = $summary.scannerLocation
+              echo "### 📍 Scanner Location" >> $env:GITHUB_STEP_SUMMARY
+              echo "" >> $env:GITHUB_STEP_SUMMARY
+              echo "| Property | Value |" >> $env:GITHUB_STEP_SUMMARY
+              echo "|----------|-------|" >> $env:GITHUB_STEP_SUMMARY
+              echo "| Country | $($loc.country) |" >> $env:GITHUB_STEP_SUMMARY
+              echo "| ISP | $($loc.isp) |" >> $env:GITHUB_STEP_SUMMARY
+              echo "| ASN | $($loc.asn) |" >> $env:GITHUB_STEP_SUMMARY
+              echo "" >> $env:GITHUB_STEP_SUMMARY
+            }
+            
+            # Blocked Targets
+            $blocked = $summary.results | Where-Object { $_.OverallStatus -notin @("PASS") }
+            if ($blocked.Count -gt 0) {
+              echo "### 🚫 Blocked/Failed Targets" >> $env:GITHUB_STEP_SUMMARY
+              echo "" >> $env:GITHUB_STEP_SUMMARY
+              echo "| Target | Host | Status | Location | ASN |" >> $env:GITHUB_STEP_SUMMARY
+              echo "|--------|------|--------|----------|-----|" >> $env:GITHUB_STEP_SUMMARY
+              
+              $blocked | Select-Object -First 15 | ForEach-Object {
+                $intel = $_.Intelligence
+                $country = if ($intel.Country) { $intel.Country } else { "Unknown" }
+                $asn = if ($intel.ASN) { $intel.ASN } else { "--" }
+                echo "| $($_.Name) | ``$($_.Host)`` | $($_.OverallStatus) | $country | $asn |" >> $env:GITHUB_STEP_SUMMARY
+              }
+              echo "" >> $env:GITHUB_STEP_SUMMARY
+            }
+            
+            # Passed Targets
+            $passed = $summary.results | Where-Object { $_.OverallStatus -eq "PASS" }
+            if ($passed.Count -gt 0) {
+              echo "### ✅ Reachable Targets" >> $env:GITHUB_STEP_SUMMARY
+              echo "" >> $env:GITHUB_STEP_SUMMARY
+              echo "| Target | Host | Latency | Location | ASN |" >> $env:GITHUB_STEP_SUMMARY
+              echo "|--------|------|---------|----------|-----|" >> $env:GITHUB_STEP_SUMMARY
+              
+              $passed | Select-Object -First 10 | ForEach-Object {
+                $intel = $_.Intelligence
+                $latency = if ($_.Tests.Ping.AvgLatency) { "$($_.Tests.Ping.AvgLatency)ms" } else { "--" }
+                $country = if ($intel.Country) { $intel.Country } else { "Unknown" }
+                $asn = if ($intel.ASN) { $intel.ASN } else { "--" }
+                echo "| $($_.Name) | ``$($_.Host)`` | $latency | $country | $asn |" >> $env:GITHUB_STEP_SUMMARY
+              }
+            }
           }
+          
+          echo "" >> $env:GITHUB_STEP_SUMMARY
+          echo "---" >> $env:GITHUB_STEP_SUMMARY
+          echo "📊 [View Dashboard](https://${{ github.repository_owner }}.github.io/FilterMapIR/) | 📁 [View Reports](https://github.com/${{ github.repository }}/tree/main/reports/$dateFolder)" >> $env:GITHUB_STEP_SUMMARY
         shell: pwsh
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JOB 2: Deploy Pages (Optional - runs after scan)
+  # ═══════════════════════════════════════════════════════════════════════════
+  deploy-pages:
+    name: 🚀 Deploy GitHub Pages
+    needs: network-scan
+    runs-on: ubuntu-latest
+    if: always() && needs.network-scan.result != 'cancelled'
+    
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main  # Get latest with commits from scan job
+      
+      - name: 🔄 Pull Latest Changes
+        run: git pull origin main
+      
+      - name: 📄 Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: 📦 Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/
+      
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+  # ═══════════════════════════════════════════════════════════════════════════
+  # JOB 3: Cleanup Old Reports
+  # ═══════════════════════════════════════════════════════════════════════════
+  cleanup:
+    name: 🧹 Cleanup Old Reports
+    needs: network-scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 🔄 Pull Latest
+        run: git pull origin main
+      
+      - name: 🗑️ Remove Old Reports
+        run: |
+          cd reports
+          
+          # Keep only last N days of reports
+          RETENTION_DAYS=${{ env.REPORT_RETENTION_DAYS }}
+          CUTOFF_DATE=$(date -d "-${RETENTION_DAYS} days" +%Y-%m-%d)
+          
+          echo "Removing reports older than $CUTOFF_DATE..."
+          
+          for dir in */; do
+            dir_name="${dir%/}"
+            if [[ "$dir_name" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+              if [[ "$dir_name" < "$CUTOFF_DATE" ]]; then
+                echo "Removing old report: $dir_name"
+                rm -rf "$dir_name"
+              fi
+            fi
+          done
+      
+      - name: 💾 Commit Cleanup
+        run: |
+          git config user.name "FilterMapIR Bot"
+          git config user.email "bot@filtermapir.github.io"
+          
+          git add -A
+          git commit -m "🧹 Cleanup: Removed reports older than ${{ env.REPORT_RETENTION_DAYS }} days" || echo "No cleanup needed"
+          git push
