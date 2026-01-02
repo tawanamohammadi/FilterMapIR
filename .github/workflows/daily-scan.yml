@@ -1,6 +1,14 @@
 name: 🛡️ FilterMapIR Daily Network Intelligence Scan
 
 on:
+  # Trigger on push to main (for code/web updates)
+  push:
+    branches:
+      - "main"
+    paths-ignore:
+      - "reports/**"  # Avoid loops when bot commits reports
+      - "README.md"
+  
   # Scheduled daily runs
   schedule:
     - cron: '0 0 * * *'    # 00:00 UTC (03:30 Iran)
