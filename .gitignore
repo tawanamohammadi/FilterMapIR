@@ -1,0 +1,21 @@
+# Ignore local test outputs
+reports/*/raw/
+
+# Local development 
+.vscode/
+*.log
+*.tmp
+
+# PowerShell artifacts
+*.ps1xml
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~

@@ -1,0 +1,685 @@
+{
+    "metadata": {
+        "scanDate": "2026-01-03T00:30:00Z",
+        "scriptVersion": "2.0.0",
+        "totalTargets": 20,
+        "passCount": 6,
+        "failCount": 11,
+        "partialCount": 2,
+        "degradedCount": 1,
+        "passRate": 30.0,
+        "avgLatency": 127.5
+    },
+    "scannerLocation": {
+        "country": "Iran",
+        "countryCode": "IR",
+        "isp": "Mobile Communication Company of Iran (MCI)",
+        "asn": "AS197207",
+        "connectionType": "Residential/Business"
+    },
+    "results": [
+        {
+            "Name": "Google DNS",
+            "Host": "8.8.8.8",
+            "Category": "DNS",
+            "Priority": "high",
+            "Note": "Primary Google DNS",
+            "OverallStatus": "PASS",
+            "Intelligence": {
+                "Country": "United States",
+                "CountryCode": "US",
+                "City": "Mountain View",
+                "ISP": "Google LLC",
+                "ASN": "AS15169",
+                "ASName": "GOOGLE",
+                "IsCDN": false,
+                "IsDatacenter": true
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "Skipped": true
+                },
+                "Ping": {
+                    "Success": true,
+                    "AvgLatency": 45,
+                    "MinLatency": 42,
+                    "MaxLatency": 52,
+                    "Jitter": 3.2,
+                    "LossPercent": 0
+                },
+                "Ports": [
+                    {
+                        "Port": 53,
+                        "Success": true
+                    },
+                    {
+                        "Port": 443,
+                        "Success": true
+                    }
+                ],
+                "TLS": {
+                    "Success": true,
+                    "TlsStatus": "TLS_OK",
+                    "TlsVersion": "TLSv1.3",
+                    "StatusCode": 200
+                }
+            }
+        },
+        {
+            "Name": "Cloudflare DNS",
+            "Host": "1.1.1.1",
+            "Category": "DNS",
+            "Priority": "high",
+            "Note": "Cloudflare DNS",
+            "OverallStatus": "PASS",
+            "Intelligence": {
+                "Country": "Australia",
+                "CountryCode": "AU",
+                "City": "Sydney",
+                "ISP": "Cloudflare, Inc.",
+                "ASN": "AS13335",
+                "ASName": "CLOUDFLARENET",
+                "IsCDN": true,
+                "IsDatacenter": true
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "Skipped": true
+                },
+                "Ping": {
+                    "Success": true,
+                    "AvgLatency": 38,
+                    "MinLatency": 35,
+                    "MaxLatency": 45,
+                    "Jitter": 2.8,
+                    "LossPercent": 0
+                },
+                "Ports": [
+                    {
+                        "Port": 53,
+                        "Success": true
+                    },
+                    {
+                        "Port": 443,
+                        "Success": true
+                    }
+                ],
+                "TLS": {
+                    "Success": true,
+                    "TlsStatus": "TLS_OK",
+                    "TlsVersion": "TLSv1.3",
+                    "StatusCode": 200
+                }
+            }
+        },
+        {
+            "Name": "Google",
+            "Host": "google.com",
+            "Category": "Search",
+            "Priority": "high",
+            "Note": "Google main domain",
+            "OverallStatus": "BLOCKED",
+            "Intelligence": {
+                "Country": "Unknown",
+                "CountryCode": "--",
+                "ASN": "Unknown"
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": false,
+                    "ErrorMsg": "DNS name does not exist",
+                    "ResolutionTime_ms": 5023
+                },
+                "Ping": {
+                    "Success": false,
+                    "LossPercent": 100
+                },
+                "Ports": [
+                    {
+                        "Port": 80,
+                        "Success": false
+                    },
+                    {
+                        "Port": 443,
+                        "Success": false
+                    }
+                ],
+                "TLS": {
+                    "Success": false,
+                    "TlsStatus": "DNS_FAIL"
+                }
+            }
+        },
+        {
+            "Name": "YouTube",
+            "Host": "youtube.com",
+            "Category": "Video",
+            "Priority": "high",
+            "Note": "Video streaming",
+            "OverallStatus": "BLOCKED",
+            "Intelligence": {
+                "Country": "Unknown",
+                "CountryCode": "--",
+                "ASN": "Unknown"
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": false,
+                    "ErrorMsg": "DNS name does not exist"
+                },
+                "Ping": {
+                    "Success": false,
+                    "LossPercent": 100
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": false
+                    }
+                ],
+                "TLS": {
+                    "Success": false,
+                    "TlsStatus": "DNS_FAIL"
+                }
+            }
+        },
+        {
+            "Name": "Twitter/X",
+            "Host": "x.com",
+            "Category": "Social",
+            "Priority": "high",
+            "Note": "Social media",
+            "OverallStatus": "BLOCKED",
+            "Intelligence": {
+                "Country": "United States",
+                "CountryCode": "US",
+                "City": "San Francisco",
+                "ISP": "Twitter Inc.",
+                "ASN": "AS13414",
+                "ASName": "TWITTER"
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "IPv4": [
+                        "104.244.42.1"
+                    ],
+                    "ResolutionTime_ms": 85
+                },
+                "Ping": {
+                    "Success": false,
+                    "LossPercent": 100
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": false,
+                        "State": "Filtered"
+                    }
+                ],
+                "TLS": {
+                    "Success": false,
+                    "TlsStatus": "CONNECTION_RESET"
+                }
+            }
+        },
+        {
+            "Name": "Telegram Web",
+            "Host": "web.telegram.org",
+            "Category": "Messaging",
+            "Priority": "high",
+            "Note": "Telegram web",
+            "OverallStatus": "BLOCKED",
+            "Intelligence": {
+                "Country": "Unknown",
+                "CountryCode": "--",
+                "ASN": "Unknown"
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": false,
+                    "ErrorMsg": "DNS poisoned"
+                },
+                "Ping": {
+                    "Success": false,
+                    "LossPercent": 100
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": false
+                    }
+                ],
+                "TLS": {
+                    "Success": false,
+                    "TlsStatus": "DNS_FAIL"
+                }
+            }
+        },
+        {
+            "Name": "Telegram API",
+            "Host": "api.telegram.org",
+            "Category": "Messaging",
+            "Priority": "high",
+            "Note": "Telegram Bot API",
+            "OverallStatus": "PARTIAL",
+            "Intelligence": {
+                "Country": "Netherlands",
+                "CountryCode": "NL",
+                "City": "Amsterdam",
+                "ISP": "Telegram Messenger Inc",
+                "ASN": "AS62041",
+                "ASName": "TELEGRAM"
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "IPv4": [
+                        "149.154.167.220"
+                    ],
+                    "ResolutionTime_ms": 120
+                },
+                "Ping": {
+                    "Success": true,
+                    "AvgLatency": 180,
+                    "Jitter": 25.5,
+                    "LossPercent": 40
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": false,
+                        "State": "Filtered"
+                    }
+                ],
+                "TLS": {
+                    "Success": false,
+                    "TlsStatus": "CONNECTION_RESET"
+                }
+            }
+        },
+        {
+            "Name": "Instagram",
+            "Host": "instagram.com",
+            "Category": "Social",
+            "Priority": "high",
+            "Note": "Photo sharing",
+            "OverallStatus": "BLOCKED",
+            "Intelligence": {
+                "Country": "Unknown",
+                "CountryCode": "--",
+                "ASN": "Unknown"
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": false,
+                    "ErrorMsg": "DNS name does not exist"
+                },
+                "Ping": {
+                    "Success": false,
+                    "LossPercent": 100
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": false
+                    }
+                ],
+                "TLS": {
+                    "Success": false,
+                    "TlsStatus": "DNS_FAIL"
+                }
+            }
+        },
+        {
+            "Name": "Facebook",
+            "Host": "facebook.com",
+            "Category": "Social",
+            "Priority": "medium",
+            "Note": "Social network",
+            "OverallStatus": "BLOCKED",
+            "Intelligence": {
+                "Country": "Unknown",
+                "CountryCode": "--",
+                "ASN": "Unknown"
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": false,
+                    "ErrorMsg": "DNS name does not exist"
+                },
+                "Ping": {
+                    "Success": false,
+                    "LossPercent": 100
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": false
+                    }
+                ],
+                "TLS": {
+                    "Success": false,
+                    "TlsStatus": "DNS_FAIL"
+                }
+            }
+        },
+        {
+            "Name": "Spotify",
+            "Host": "open.spotify.com",
+            "Category": "Music",
+            "Priority": "medium",
+            "Note": "Music streaming",
+            "OverallStatus": "DEGRADED",
+            "Intelligence": {
+                "Country": "Ireland",
+                "CountryCode": "IE",
+                "City": "Dublin",
+                "ISP": "Google LLC",
+                "ASN": "AS15169",
+                "ASName": "GOOGLE",
+                "IsCDN": true
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "IPv4": [
+                        "35.186.224.25"
+                    ],
+                    "ResolutionTime_ms": 95
+                },
+                "Ping": {
+                    "Success": true,
+                    "AvgLatency": 320,
+                    "MinLatency": 280,
+                    "MaxLatency": 450,
+                    "Jitter": 45.2,
+                    "LossPercent": 15
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": true
+                    }
+                ],
+                "TLS": {
+                    "Success": true,
+                    "TlsStatus": "TLS_OK",
+                    "TlsVersion": "TLSv1.3"
+                }
+            }
+        },
+        {
+            "Name": "Discord",
+            "Host": "discord.com",
+            "Category": "Gaming",
+            "Priority": "medium",
+            "Note": "Gaming community",
+            "OverallStatus": "BLOCKED",
+            "Intelligence": {
+                "Country": "United States",
+                "CountryCode": "US",
+                "City": "San Francisco",
+                "ISP": "Cloudflare, Inc.",
+                "ASN": "AS13335",
+                "ASName": "CLOUDFLARENET",
+                "IsCDN": true
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "IPv4": [
+                        "162.159.138.232"
+                    ],
+                    "ResolutionTime_ms": 45
+                },
+                "Ping": {
+                    "Success": false,
+                    "LossPercent": 100
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": false,
+                        "State": "Filtered"
+                    }
+                ],
+                "TLS": {
+                    "Success": false,
+                    "TlsStatus": "TIMEOUT"
+                }
+            }
+        },
+        {
+            "Name": "GitHub",
+            "Host": "github.com",
+            "Category": "Development",
+            "Priority": "high",
+            "Note": "Code hosting",
+            "OverallStatus": "PASS",
+            "Intelligence": {
+                "Country": "United States",
+                "CountryCode": "US",
+                "City": "Ashburn",
+                "ISP": "Microsoft Corporation",
+                "ASN": "AS8075",
+                "ASName": "MICROSOFT-CORP-MSN-AS-BLOCK",
+                "IsDatacenter": true
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "IPv4": [
+                        "140.82.121.3"
+                    ],
+                    "ResolutionTime_ms": 35,
+                    "DNSProvider": "Cloudflare"
+                },
+                "Ping": {
+                    "Success": true,
+                    "AvgLatency": 85,
+                    "MinLatency": 78,
+                    "MaxLatency": 95,
+                    "Jitter": 4.2,
+                    "LossPercent": 0
+                },
+                "Ports": [
+                    {
+                        "Port": 22,
+                        "Success": true
+                    },
+                    {
+                        "Port": 443,
+                        "Success": true
+                    }
+                ],
+                "TLS": {
+                    "Success": true,
+                    "TlsStatus": "TLS_OK",
+                    "TlsVersion": "TLSv1.3",
+                    "StatusCode": 200
+                }
+            }
+        },
+        {
+            "Name": "Cloudflare",
+            "Host": "cloudflare.com",
+            "Category": "CDN",
+            "Priority": "high",
+            "Note": "CDN provider",
+            "OverallStatus": "PASS",
+            "Intelligence": {
+                "Country": "United States",
+                "CountryCode": "US",
+                "City": "San Francisco",
+                "ISP": "Cloudflare, Inc.",
+                "ASN": "AS13335",
+                "ASName": "CLOUDFLARENET",
+                "IsCDN": true,
+                "IsDatacenter": true
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "IPv4": [
+                        "104.16.132.229"
+                    ],
+                    "ResolutionTime_ms": 28
+                },
+                "Ping": {
+                    "Success": true,
+                    "AvgLatency": 42,
+                    "MinLatency": 38,
+                    "MaxLatency": 48,
+                    "Jitter": 2.5,
+                    "LossPercent": 0
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": true
+                    }
+                ],
+                "TLS": {
+                    "Success": true,
+                    "TlsStatus": "TLS_OK",
+                    "TlsVersion": "TLSv1.3",
+                    "StatusCode": 200
+                }
+            }
+        },
+        {
+            "Name": "Signal",
+            "Host": "signal.org",
+            "Category": "Messaging",
+            "Priority": "medium",
+            "Note": "Secure messaging",
+            "OverallStatus": "PASS",
+            "Intelligence": {
+                "Country": "United States",
+                "CountryCode": "US",
+                "City": "Ashburn",
+                "ISP": "Amazon Technologies Inc.",
+                "ASN": "AS16509",
+                "ASName": "AMAZON-02",
+                "IsDatacenter": true
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "IPv4": [
+                        "76.223.92.165"
+                    ],
+                    "ResolutionTime_ms": 42
+                },
+                "Ping": {
+                    "Success": true,
+                    "AvgLatency": 95,
+                    "MinLatency": 88,
+                    "MaxLatency": 110,
+                    "Jitter": 5.8,
+                    "LossPercent": 0
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": true
+                    }
+                ],
+                "TLS": {
+                    "Success": true,
+                    "TlsStatus": "TLS_OK",
+                    "TlsVersion": "TLSv1.3",
+                    "StatusCode": 200
+                }
+            }
+        },
+        {
+            "Name": "OpenAI",
+            "Host": "openai.com",
+            "Category": "AI",
+            "Priority": "medium",
+            "Note": "AI services",
+            "OverallStatus": "PARTIAL",
+            "Intelligence": {
+                "Country": "United States",
+                "CountryCode": "US",
+                "City": "San Francisco",
+                "ISP": "Cloudflare, Inc.",
+                "ASN": "AS13335",
+                "ASName": "CLOUDFLARENET",
+                "IsCDN": true
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "IPv4": [
+                        "104.18.32.47"
+                    ],
+                    "ResolutionTime_ms": 38
+                },
+                "Ping": {
+                    "Success": true,
+                    "AvgLatency": 120,
+                    "Jitter": 8.5,
+                    "LossPercent": 5
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": true
+                    }
+                ],
+                "TLS": {
+                    "Success": true,
+                    "TlsStatus": "TLS_OK",
+                    "TlsVersion": "TLSv1.3",
+                    "StatusCode": 403
+                }
+            }
+        },
+        {
+            "Name": "ChatGPT",
+            "Host": "chat.openai.com",
+            "Category": "AI",
+            "Priority": "high",
+            "Note": "ChatGPT interface",
+            "OverallStatus": "BLOCKED",
+            "Intelligence": {
+                "Country": "United States",
+                "CountryCode": "US",
+                "City": "San Francisco",
+                "ISP": "Cloudflare, Inc.",
+                "ASN": "AS13335",
+                "ASName": "CLOUDFLARENET",
+                "IsCDN": true
+            },
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "IPv4": [
+                        "104.18.36.47"
+                    ],
+                    "ResolutionTime_ms": 35
+                },
+                "Ping": {
+                    "Success": false,
+                    "LossPercent": 100
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": false,
+                        "State": "Filtered"
+                    }
+                ],
+                "TLS": {
+                    "Success": false,
+                    "TlsStatus": "TIMEOUT"
+                }
+            }
+        }
+    ]
+}

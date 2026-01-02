@@ -1,0 +1,301 @@
+{
+    "metadata": {
+        "scanDate": "2026-01-03T00:00:00Z",
+        "scriptVersion": "1.0.0",
+        "totalTargets": 20,
+        "passCount": 5,
+        "failCount": 12,
+        "partialCount": 2,
+        "degradedCount": 1,
+        "passRate": 25.0,
+        "avgLatency": 145.5
+    },
+    "settings": {
+        "pingCount": 4,
+        "timeoutSeconds": 10,
+        "enableTraceroute": false,
+        "maxTracerouteHops": 15
+    },
+    "results": [
+        {
+            "Name": "Google DNS",
+            "Host": "8.8.8.8",
+            "Category": "DNS",
+            "Priority": "high",
+            "Note": "Primary Google DNS",
+            "Timestamp": "2026-01-03T00:01:15Z",
+            "OverallStatus": "PASS",
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "Skipped": true,
+                    "Note": "IP address"
+                },
+                "Ping": {
+                    "Success": true,
+                    "AvgLatency": 45,
+                    "LossPercent": 0
+                },
+                "Ports": [
+                    {
+                        "Port": 53,
+                        "Success": true,
+                        "State": "Open"
+                    },
+                    {
+                        "Port": 443,
+                        "Success": true,
+                        "State": "Open"
+                    }
+                ],
+                "HTTPS": {
+                    "Success": true,
+                    "TlsStatus": "TLS_OK",
+                    "StatusCode": 200
+                }
+            }
+        },
+        {
+            "Name": "Cloudflare DNS",
+            "Host": "1.1.1.1",
+            "Category": "DNS",
+            "Priority": "high",
+            "Note": "Cloudflare DNS resolver",
+            "Timestamp": "2026-01-03T00:01:35Z",
+            "OverallStatus": "PASS",
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "Skipped": true,
+                    "Note": "IP address"
+                },
+                "Ping": {
+                    "Success": true,
+                    "AvgLatency": 38,
+                    "LossPercent": 0
+                },
+                "Ports": [
+                    {
+                        "Port": 53,
+                        "Success": true,
+                        "State": "Open"
+                    },
+                    {
+                        "Port": 443,
+                        "Success": true,
+                        "State": "Open"
+                    }
+                ],
+                "HTTPS": {
+                    "Success": true,
+                    "TlsStatus": "TLS_OK",
+                    "StatusCode": 200
+                }
+            }
+        },
+        {
+            "Name": "Google",
+            "Host": "google.com",
+            "Category": "Search",
+            "Priority": "high",
+            "Note": "Google main domain",
+            "Timestamp": "2026-01-03T00:02:00Z",
+            "OverallStatus": "BLOCKED",
+            "Tests": {
+                "DNS": {
+                    "Success": false,
+                    "ErrorMsg": "DNS name does not exist"
+                },
+                "Ping": {
+                    "Success": false,
+                    "LossPercent": 100
+                },
+                "Ports": [
+                    {
+                        "Port": 80,
+                        "Success": false,
+                        "State": "Filtered"
+                    },
+                    {
+                        "Port": 443,
+                        "Success": false,
+                        "State": "Filtered"
+                    }
+                ],
+                "HTTPS": {
+                    "Success": false,
+                    "TlsStatus": "DNS_FAIL"
+                }
+            }
+        },
+        {
+            "Name": "YouTube",
+            "Host": "youtube.com",
+            "Category": "Video",
+            "Priority": "high",
+            "Note": "Video streaming platform",
+            "Timestamp": "2026-01-03T00:02:30Z",
+            "OverallStatus": "BLOCKED",
+            "Tests": {
+                "DNS": {
+                    "Success": false,
+                    "ErrorMsg": "DNS name does not exist"
+                },
+                "Ping": {
+                    "Success": false,
+                    "LossPercent": 100
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": false,
+                        "State": "Filtered"
+                    }
+                ],
+                "HTTPS": {
+                    "Success": false,
+                    "TlsStatus": "DNS_FAIL"
+                }
+            }
+        },
+        {
+            "Name": "Twitter/X",
+            "Host": "x.com",
+            "Category": "Social",
+            "Priority": "high",
+            "Note": "Social media platform",
+            "Timestamp": "2026-01-03T00:03:00Z",
+            "OverallStatus": "BLOCKED",
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "IPv4": [
+                        "104.244.42.1"
+                    ]
+                },
+                "Ping": {
+                    "Success": false,
+                    "LossPercent": 100
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": false,
+                        "State": "Filtered"
+                    }
+                ],
+                "HTTPS": {
+                    "Success": false,
+                    "TlsStatus": "CONNECTION_RESET"
+                }
+            }
+        },
+        {
+            "Name": "GitHub",
+            "Host": "github.com",
+            "Category": "Development",
+            "Priority": "high",
+            "Note": "Code hosting",
+            "Timestamp": "2026-01-03T00:03:30Z",
+            "OverallStatus": "PASS",
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "IPv4": [
+                        "140.82.121.3"
+                    ]
+                },
+                "Ping": {
+                    "Success": true,
+                    "AvgLatency": 85,
+                    "LossPercent": 0
+                },
+                "Ports": [
+                    {
+                        "Port": 22,
+                        "Success": true,
+                        "State": "Open"
+                    },
+                    {
+                        "Port": 443,
+                        "Success": true,
+                        "State": "Open"
+                    }
+                ],
+                "HTTPS": {
+                    "Success": true,
+                    "TlsStatus": "TLS_OK",
+                    "StatusCode": 200
+                }
+            }
+        },
+        {
+            "Name": "Cloudflare",
+            "Host": "cloudflare.com",
+            "Category": "CDN",
+            "Priority": "high",
+            "Note": "CDN provider",
+            "Timestamp": "2026-01-03T00:04:00Z",
+            "OverallStatus": "PASS",
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "IPv4": [
+                        "104.16.133.229"
+                    ]
+                },
+                "Ping": {
+                    "Success": true,
+                    "AvgLatency": 42,
+                    "LossPercent": 0
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": true,
+                        "State": "Open"
+                    }
+                ],
+                "HTTPS": {
+                    "Success": true,
+                    "TlsStatus": "TLS_OK",
+                    "StatusCode": 200
+                }
+            }
+        },
+        {
+            "Name": "Signal",
+            "Host": "signal.org",
+            "Category": "Messaging",
+            "Priority": "medium",
+            "Note": "Secure messaging",
+            "Timestamp": "2026-01-03T00:04:30Z",
+            "OverallStatus": "PASS",
+            "Tests": {
+                "DNS": {
+                    "Success": true,
+                    "IPv4": [
+                        "76.223.92.165"
+                    ]
+                },
+                "Ping": {
+                    "Success": true,
+                    "AvgLatency": 95,
+                    "LossPercent": 0
+                },
+                "Ports": [
+                    {
+                        "Port": 443,
+                        "Success": true,
+                        "State": "Open"
+                    }
+                ],
+                "HTTPS": {
+                    "Success": true,
+                    "TlsStatus": "TLS_OK",
+                    "StatusCode": 200
+                }
+            }
+        }
+    ]
+}

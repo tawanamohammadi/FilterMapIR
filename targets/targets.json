@@ -1,0 +1,220 @@
+{
+    "metadata": {
+        "version": "1.0.0",
+        "description": "FilterMapIR - Iran Reachability Targets",
+        "lastUpdated": "2026-01-03",
+        "author": "FilterMapIR Team"
+    },
+    "settings": {
+        "pingCount": 4,
+        "timeoutSeconds": 10,
+        "enableTraceroute": false,
+        "maxTracerouteHops": 15
+    },
+    "targets": [
+        {
+            "name": "Google DNS",
+            "host": "8.8.8.8",
+            "ports": [
+                53,
+                443
+            ],
+            "category": "DNS",
+            "priority": "high",
+            "note": "Primary Google DNS"
+        },
+        {
+            "name": "Cloudflare DNS",
+            "host": "1.1.1.1",
+            "ports": [
+                53,
+                443
+            ],
+            "category": "DNS",
+            "priority": "high",
+            "note": "Cloudflare DNS resolver"
+        },
+        {
+            "name": "Google",
+            "host": "google.com",
+            "ports": [
+                80,
+                443
+            ],
+            "category": "Search",
+            "priority": "high",
+            "note": "Google main domain"
+        },
+        {
+            "name": "YouTube",
+            "host": "youtube.com",
+            "ports": [
+                443
+            ],
+            "category": "Video",
+            "priority": "high",
+            "note": "Video streaming platform"
+        },
+        {
+            "name": "Twitter/X",
+            "host": "x.com",
+            "ports": [
+                443
+            ],
+            "category": "Social",
+            "priority": "high",
+            "note": "Social media platform"
+        },
+        {
+            "name": "Telegram Web",
+            "host": "web.telegram.org",
+            "ports": [
+                443
+            ],
+            "category": "Messaging",
+            "priority": "high",
+            "note": "Telegram web interface"
+        },
+        {
+            "name": "Telegram API",
+            "host": "api.telegram.org",
+            "ports": [
+                443
+            ],
+            "category": "Messaging",
+            "priority": "high",
+            "note": "Telegram Bot API"
+        },
+        {
+            "name": "WhatsApp",
+            "host": "web.whatsapp.com",
+            "ports": [
+                443
+            ],
+            "category": "Messaging",
+            "priority": "medium",
+            "note": "WhatsApp web interface"
+        },
+        {
+            "name": "Instagram",
+            "host": "instagram.com",
+            "ports": [
+                443
+            ],
+            "category": "Social",
+            "priority": "high",
+            "note": "Photo sharing platform"
+        },
+        {
+            "name": "Facebook",
+            "host": "facebook.com",
+            "ports": [
+                443
+            ],
+            "category": "Social",
+            "priority": "medium",
+            "note": "Social network"
+        },
+        {
+            "name": "Spotify",
+            "host": "open.spotify.com",
+            "ports": [
+                443
+            ],
+            "category": "Music",
+            "priority": "medium",
+            "note": "Music streaming"
+        },
+        {
+            "name": "Discord",
+            "host": "discord.com",
+            "ports": [
+                443
+            ],
+            "category": "Gaming",
+            "priority": "medium",
+            "note": "Gaming community platform"
+        },
+        {
+            "name": "Twitch",
+            "host": "twitch.tv",
+            "ports": [
+                443
+            ],
+            "category": "Streaming",
+            "priority": "medium",
+            "note": "Live streaming platform"
+        },
+        {
+            "name": "Medium",
+            "host": "medium.com",
+            "ports": [
+                443
+            ],
+            "category": "Publishing",
+            "priority": "low",
+            "note": "Publishing platform"
+        },
+        {
+            "name": "Cloudflare",
+            "host": "cloudflare.com",
+            "ports": [
+                443
+            ],
+            "category": "CDN",
+            "priority": "high",
+            "note": "CDN provider"
+        },
+        {
+            "name": "GitHub",
+            "host": "github.com",
+            "ports": [
+                22,
+                443
+            ],
+            "category": "Development",
+            "priority": "high",
+            "note": "Code hosting"
+        },
+        {
+            "name": "OpenAI",
+            "host": "openai.com",
+            "ports": [
+                443
+            ],
+            "category": "AI",
+            "priority": "medium",
+            "note": "AI services"
+        },
+        {
+            "name": "ChatGPT",
+            "host": "chat.openai.com",
+            "ports": [
+                443
+            ],
+            "category": "AI",
+            "priority": "high",
+            "note": "ChatGPT interface"
+        },
+        {
+            "name": "Signal",
+            "host": "signal.org",
+            "ports": [
+                443
+            ],
+            "category": "Messaging",
+            "priority": "medium",
+            "note": "Secure messaging"
+        },
+        {
+            "name": "BBC Persian",
+            "host": "bbc.com",
+            "ports": [
+                443
+            ],
+            "category": "News",
+            "priority": "medium",
+            "note": "International news"
+        }
+    ]
+}

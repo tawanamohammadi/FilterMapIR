@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تاریخچه اسکن‌ها - FilterMapIR</title>
+    <meta name="description" content="Historical scan data and reports for internet reachability in Iran">
+    
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-hover: #242432;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606080;
+            --accent-primary: #00d4aa;
+            --accent-secondary: #00a888;
+            --accent-glow: rgba(0, 212, 170, 0.3);
+            --success: #00d26a;
+            --warning: #ffc107;
+            --danger: #ff4757;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --gradient-cyber: linear-gradient(135deg, #00d4aa 0%, #00a2ff 100%);
+            --shadow-glow: 0 0 40px rgba(0, 212, 170, 0.15);
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 170, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 170, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            z-index: 1000;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .nav-brand .logo {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-cyber);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--accent-primary);
+            background: rgba(0, 212, 170, 0.1);
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+            padding: 100px 40px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: var(--gradient-cyber);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-description {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            right: 24px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent-primary), transparent);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-right: 60px;
+            padding-bottom: 32px;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            right: 16px;
+            top: 8px;
+            width: 18px;
+            height: 18px;
+            background: var(--bg-primary);
+            border: 3px solid var(--accent-primary);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .timeline-dot.success { border-color: var(--success); }
+        .timeline-dot.warning { border-color: var(--warning); }
+        .timeline-dot.danger { border-color: var(--danger); }
+
+        .history-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: 24px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .history-card:hover {
+            transform: translateX(-8px);
+            border-color: rgba(0, 212, 170, 0.3);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .history-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .history-date {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .history-date-persian {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .history-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: var(--radius-lg);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .history-badge.success {
+            background: rgba(0, 210, 106, 0.15);
+            color: var(--success);
+        }
+
+        .history-badge.warning {
+            background: rgba(255, 193, 7, 0.15);
+            color: var(--warning);
+        }
+
+        .history-badge.danger {
+            background: rgba(255, 71, 87, 0.15);
+            color: var(--danger);
+        }
+
+        .history-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .history-stat {
+            text-align: center;
+            padding: 16px 12px;
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+        }
+
+        .history-stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .history-stat-value.success { color: var(--success); }
+        .history-stat-value.danger { color: var(--danger); }
+        .history-stat-value.info { color: var(--accent-primary); }
+
+        .history-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .history-progress {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .history-progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .history-action {
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .history-action.primary {
+            background: var(--accent-primary);
+            color: var(--bg-primary);
+        }
+
+        .history-action.primary:hover {
+            filter: brightness(1.1);
+        }
+
+        .history-action.secondary {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .history-action.secondary:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px;
+            gap: 16px;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--border-color);
+            border-top-color: var(--accent-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .empty-state-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .empty-state-text {
+            color: var(--text-secondary);
+        }
+
+        footer {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 0 20px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            main {
+                padding: 100px 20px 20px;
+            }
+            
+            .history-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .timeline::before {
+                right: 12px;
+            }
+            
+            .timeline-item {
+                padding-right: 40px;
+            }
+            
+            .timeline-dot {
+                right: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+
+    <nav>
+        <a href="index.html" class="nav-brand">
+            <div class="logo">🌐</div>
+            <span>FilterMapIR</span>
+        </a>
+        
+        <div class="nav-links">
+            <a href="index.html">داشبورد</a>
+            <a href="history.html" class="active">تاریخچه</a>
+            <a href="https://github.com/tawanamohammadi/FilterMapIR" target="_blank">GitHub</a>
+        </div>
+    </nav>
+
+    <main>
+        <div class="page-header">
+            <h1 class="page-title">📅 تاریخچه اسکن‌ها</h1>
+            <p class="page-description">مشاهده گزارش‌های روزانه و روند تغییرات دسترسی</p>
+        </div>
+
+        <div id="historyContainer">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <span>در حال بارگذاری تاریخچه...</span>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>
+            🛡️ <strong>FilterMapIR</strong> - مانیتورینگ دسترسی اینترنت ایران
+            <br>
+            <a href="https://github.com/tawanamohammadi/FilterMapIR">View on GitHub</a>
+        </p>
+    </footer>
+
+    <script>
+        async function fetchHistory() {
+            try {
+                const response = await fetch('data/history.json?t=' + Date.now());
+                if (!response.ok) throw new Error('Failed to fetch');
+                return await response.json();
+            } catch (error) {
+                console.error('Error:', error);
+                return null;
+            }
+        }
+
+        function getPassRateClass(rate) {
+            if (rate >= 80) return 'success';
+            if (rate >= 50) return 'warning';
+            return 'danger';
+        }
+
+        function getPassRateColor(rate) {
+            if (rate >= 80) return '#00d26a';
+            if (rate >= 50) return '#ffc107';
+            return '#ff4757';
+        }
+
+        function formatPersianDate(dateStr) {
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('fa-IR', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+            } catch {
+                return dateStr;
+            }
+        }
+
+        function renderHistory(data) {
+            const container = document.getElementById('historyContainer');
+            
+            if (!data || data.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <div class="empty-state-title">هنوز گزارشی ثبت نشده</div>
+                        <div class="empty-state-text">پس از اجرای اولین اسکن، گزارش‌ها اینجا نمایش داده می‌شوند</div>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="timeline">';
+            
+            data.forEach((item, index) => {
+                const rateClass = getPassRateClass(item.passRate);
+                const rateColor = getPassRateColor(item.passRate);
+                const persianDate = formatPersianDate(item.date);
+                
+                html += `
+                    <div class="timeline-item">
+                        <div class="timeline-dot ${rateClass}"></div>
+                        <div class="history-card" onclick="window.open('../reports/${item.date}/summary.md', '_blank')">
+                            <div class="history-card-header">
+                                <div>
+                                    <div class="history-date">${item.date}</div>
+                                    <div class="history-date-persian">${persianDate}</div>
+                                </div>
+                                <div class="history-badge ${rateClass}">
+                                    ${item.passRate >= 80 ? '✓ نرمال' : item.passRate >= 50 ? '⚡ اختلال' : '✗ بحرانی'}
+                                </div>
+                            </div>
+                            
+                            <div class="history-stats">
+                                <div class="history-stat">
+                                    <div class="history-stat-value info">${item.totalTargets}</div>
+                                    <div class="history-stat-label">کل اهداف</div>
+                                </div>
+                                <div class="history-stat">
+                                    <div class="history-stat-value success">${item.passCount}</div>
+                                    <div class="history-stat-label">موفق</div>
+                                </div>
+                                <div class="history-stat">
+                                    <div class="history-stat-value danger">${item.failCount}</div>
+                                    <div class="history-stat-label">ناموفق</div>
+                                </div>
+                                <div class="history-stat">
+                                    <div class="history-stat-value info">${item.avgLatency?.toFixed(0) || '--'}</div>
+                                    <div class="history-stat-label">تأخیر (ms)</div>
+                                </div>
+                            </div>
+                            
+                            <div class="history-progress">
+                                <div class="history-progress-bar" style="width: ${item.passRate}%; background: ${rateColor};"></div>
+                            </div>
+                            
+                            <div class="history-actions">
+                                <a href="../reports/${item.date}/summary.json" class="history-action secondary" onclick="event.stopPropagation()">
+                                    📄 JSON
+                                </a>
+                                <a href="../reports/${item.date}/summary.csv" class="history-action secondary" onclick="event.stopPropagation()">
+                                    📊 CSV
+                                </a>
+                                <a href="../reports/${item.date}/summary.md" class="history-action primary" onclick="event.stopPropagation()">
+                                    📝 مشاهده گزارش
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        async function init() {
+            const data = await fetchHistory();
+            renderHistory(data);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
