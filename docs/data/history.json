@@ -1,8 +1,8 @@
 {
-  "date": "2026-01-03",
+  "passRate": 25.0,
+  "totalTargets": 20,
   "passCount": 5,
   "avgLatency": 145.5,
-  "totalTargets": 20,
-  "failCount": 12,
-  "passRate": 25.0
+  "date": "2026-01-03",
+  "failCount": 12
 }
