@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-01-14T02:14:24Z",
+  "runner": {
+    "arch": "X64",
+    "os": "Windows"
+  },
+  "scan": {
+    "duration": "27.8156269",
+    "exitCode": "1",
+    "deepScan": false,
+    "traceroute": false,
+    "date": "2026-01-14"
+  },
+  "workflow": {
+    "runNumber": 24,
+    "actor": "tawanamohammadi",
+    "repository": "tawanamohammadi/FilterMapIR",
+    "commitSha": "1ae4023f79dc45a40c27fdf9635c47386d9a3ea9",
+    "branch": "main",
+    "runId": "20979845281",
+    "triggeredBy": "schedule"
+  }
+}
