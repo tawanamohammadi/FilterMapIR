@@ -1,23 +1,23 @@
 {
+  "workflow": {
+    "runNumber": 53,
+    "commitSha": "8f51bc885098aad22a35d8f89ce69fedced3af21",
+    "branch": "main",
+    "repository": "tawanamohammadi/FilterMapIR",
+    "actor": "tawanamohammadi",
+    "triggeredBy": "schedule",
+    "runId": "21438869003"
+  },
+  "timestamp": "2026-01-28T12:50:00Z",
   "runner": {
     "os": "Windows",
     "arch": "X64"
   },
-  "workflow": {
-    "runId": "21422173975",
-    "triggeredBy": "schedule",
-    "repository": "tawanamohammadi/FilterMapIR",
-    "commitSha": "b66504aae061bb59ebbdadb5c578c32786fe1716",
-    "runNumber": 52,
-    "branch": "main",
-    "actor": "tawanamohammadi"
-  },
-  "timestamp": "2026-01-28T02:12:35Z",
   "scan": {
-    "exitCode": "1",
-    "date": "2026-01-28",
-    "duration": "23.8022565",
     "traceroute": false,
-    "deepScan": false
+    "duration": "26.9045033",
+    "exitCode": "1",
+    "deepScan": false,
+    "date": "2026-01-28"
   }
 }
