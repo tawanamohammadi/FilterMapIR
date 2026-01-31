@@ -3,6 +3,6 @@
   "totalTargets": 20,
   "date": "2026-01-03",
   "passCount": 5,
-  "avgLatency": 145.5,
-  "failCount": 12
+  "failCount": 12,
+  "avgLatency": 145.5
 }
